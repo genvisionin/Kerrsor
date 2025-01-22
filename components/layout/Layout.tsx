@@ -1,7 +1,7 @@
 "use client";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import WOW from 'wow.js';
+import WOW from "wow.js";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import BackToTop from "../elements/BackToTop";
@@ -47,31 +47,33 @@ export default function Layout({
   const [isOffCanvas, setOffCanvas] = useState<boolean>(false);
   const handleOffCanvas = (): void => setOffCanvas(!isOffCanvas);
 
-
   useEffect(() => {
-    const WOWInstance: any = new WOW({
-      live: false,
-    });
-    WOWInstance.init();
+    // Check if 'window' is defined to ensure code runs only on the client side
+    if (typeof window !== "undefined") {
+      // Dynamically import 'wow.js' only on the client side
+      import("wow.js").then((module) => {
+        const WOW = module.default;
+        const WOWInstance = new WOW({ live: false });
+        WOWInstance.init();
+      });
 
-    // // Initialize WOW.js
-    (window as any).wow.init();
+      // Initialize AOS
+      AOS.init();
 
-    AOS.init();
+      const handleScroll = () => {
+        const scrollCheck = window.scrollY > 100;
+        if (scrollCheck !== scroll) {
+          setScroll(scrollCheck);
+        }
+      };
 
-    const handleScroll = (): void => {
-      const scrollCheck: boolean = window.scrollY > 100;
-      if (scrollCheck !== scroll) {
-        setScroll(scrollCheck);
-      }
-    };
+      window.addEventListener("scroll", handleScroll);
 
-    document.addEventListener("scroll", handleScroll);
-
-    return () => {
-      document.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
+      return () => {
+        window.removeEventListener("scroll", handleScroll);
+      };
+    }
+  }, [scroll]);
   return (
     <>
       <div id="top" />
